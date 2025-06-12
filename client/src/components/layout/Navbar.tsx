@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const navigate = useNavigate();
@@ -16,6 +17,19 @@ const Navbar: React.FC = () => {
     navigate('/');
     setIsMenuOpen(false);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isUserDropdownOpen && !target.closest('.user-dropdown')) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isUserDropdownOpen]);
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -55,24 +69,72 @@ const Navbar: React.FC = () => {
                 </span>
               )}
             </Link>
-            
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link 
-                  to="/profile" 
-                  className="flex items-center text-gray-700 hover:text-pink-500 transition-colors px-3 py-2 rounded-lg hover:bg-pink-50"
+              {user ? (
+              <div className="flex items-center space-x-4">                {/* User Dropdown */}
+                <div 
+                  className="relative user-dropdown group"
+                  onMouseEnter={() => setIsUserDropdownOpen(true)}
+                  onMouseLeave={() => setIsUserDropdownOpen(false)}
                 >
-                  <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span className="truncate max-w-24 text-sm font-medium">{user.name}</span>
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="btn-outline text-sm px-4 py-2"
-                >
-                  Logout
-                </button>
+                  <div className="flex items-center space-x-2 text-gray-700 hover:text-pink-500 transition-colors px-3 py-2 rounded-lg hover:bg-pink-50 cursor-pointer">
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden sm:block text-left">
+                      <div className="text-sm font-medium text-gray-900 max-w-32 truncate">
+                        {user.name}
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize">
+                        {user.role}
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                  </div>{/* Dropdown Menu */}
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 opacity-100 scale-100 transition-all duration-200 ease-out transform origin-top-right">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-xs text-pink-600 capitalize font-medium mt-1">
+                          {user.role} Account
+                        </div>
+                      </div>
+                      
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-pink-600 transition-colors"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        <User className="w-4 h-4 mr-3" />
+                        My Profile
+                      </Link>
+
+                      {user.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-pink-600 transition-colors"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <Settings className="w-4 h-4 mr-3" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+
+                      <hr className="my-2" />
+                      
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsUserDropdownOpen(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
@@ -119,17 +181,36 @@ const Navbar: React.FC = () => {
               <Link to="/cart" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Cart ({getTotalItems()})
               </Link>
-              
-              {user ? (
+                {user ? (
                 <>
-                  <Link to="/profile" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    Profile ({user.name})
+                  <div className="flex items-center space-x-3 py-3 border-t border-gray-100">
+                    <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                      <div className="text-xs text-gray-500 capitalize">{user.role} Account</div>
+                    </div>
+                  </div>
+                  
+                  <Link to="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-pink-500 transition-colors py-2" onClick={() => setIsMenuOpen(false)}>
+                    <User className="w-4 h-4" />
+                    <span>My Profile</span>
                   </Link>
+                  
+                  {user.role === 'admin' && (
+                    <Link to="/admin" className="flex items-center space-x-2 text-gray-700 hover:text-pink-500 transition-colors py-2" onClick={() => setIsMenuOpen(false)}>
+                      <Settings className="w-4 h-4" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  )}
+                  
                   <button 
                     onClick={handleLogout}
-                    className="btn-outline text-left"
+                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 transition-colors py-2 text-left"
                   >
-                    Logout
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
                   </button>
                 </>
               ) : (
