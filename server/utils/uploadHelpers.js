@@ -1,105 +1,65 @@
-const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const path = require('path');
+const fs = require('fs');
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// Storage configuration for products
-const productStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'glowskin/products',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [
-      { width: 800, height: 800, crop: 'limit' },
-      { quality: 'auto' }
-    ]
-  }
-});
-
-// Storage configuration for avatars
-const avatarStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'glowskin/avatars',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [
-      { width: 200, height: 200, crop: 'fill', gravity: 'face' },
-      { quality: 'auto' }
-    ]
-  }
-});
-
-// Storage configuration for general uploads
-const generalStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'glowskin/general',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-    resource_type: 'auto'
-  }
-});
-
-// Multer configurations
-const uploadProduct = multer({
-  storage: productStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+// Configure multer for local storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
   },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
+  filename: function (req, file, cb) {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const uploadAvatar = multer({
-  storage: avatarStorage,
-  limits: {
-    fileSize: 2 * 1024 * 1024 // 2MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
-  }
-});
-
-const uploadGeneral = multer({
-  storage: generalStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
-});
-
-// Delete file from Cloudinary
-const deleteFromCloudinary = async (publicId) => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId);
-    return result;
-  } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
-    throw error;
+// File filter for images only
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed'), false);
   }
 };
 
-// Get optimized image URL
-const getOptimizedImageUrl = (publicId, options = {}) => {
-  const defaultOptions = {
-    quality: 'auto',
-    fetch_format: 'auto'
-  };
-  
-  return cloudinary.url(publicId, { ...defaultOptions, ...options });
+// Multer configuration for product images
+const uploadProduct = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: fileFilter
+});
+
+// Multer configuration for single file
+const uploadSingle = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: fileFilter
+});
+
+// Delete local file
+const deleteLocalFile = (filePath) => {
+  try {
+    const fullPath = path.join(__dirname, '../uploads', path.basename(filePath));
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+      return { success: true };
+    }
+    return { success: false, error: 'File not found' };
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 // Validate image file
@@ -124,36 +84,15 @@ const validateImageFile = (file) => {
   return { isValid: true };
 };
 
-// Extract Cloudinary public ID from URL
-const extractPublicId = (url) => {
-  if (!url) return null;
-  
-  try {
-    const parts = url.split('/');
-    const filename = parts[parts.length - 1];
-    const publicId = filename.split('.')[0];
-    
-    // Include folder path if present
-    const folderIndex = parts.findIndex(part => part === 'glowskin');
-    if (folderIndex !== -1) {
-      const folderPath = parts.slice(folderIndex, -1).join('/');
-      return `${folderPath}/${publicId}`;
-    }
-    
-    return publicId;
-  } catch (error) {
-    console.error('Error extracting public ID:', error);
-    return null;
-  }
+// Get file URL for serving
+const getFileUrl = (filename) => {
+  return `/uploads/${filename}`;
 };
 
 module.exports = {
-  cloudinary,
   uploadProduct,
-  uploadAvatar,
-  uploadGeneral,
-  deleteFromCloudinary,
-  getOptimizedImageUrl,
+  uploadSingle,
+  deleteLocalFile,
   validateImageFile,
-  extractPublicId
+  getFileUrl
 };

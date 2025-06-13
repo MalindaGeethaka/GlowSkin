@@ -51,16 +51,9 @@ const productSchema = new mongoose.Schema({
   skinType: [{
     type: String,
     enum: ['Oily', 'Dry', 'Combination', 'Sensitive', 'Normal', 'All Types']
-  }],
-  ingredients: [String],
-  images: [{
-    url: {
-      type: String,
-      required: true
-    },
-    public_id: String,
-    alt: String
-  }],
+  }],  ingredients: [String],
+  images: [String], // Simple array of image URLs
+  usage: String,
   isActive: {
     type: Boolean,
     default: true

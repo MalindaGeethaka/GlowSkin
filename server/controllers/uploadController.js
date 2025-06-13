@@ -1,5 +1,5 @@
 const { sendSuccess, sendError } = require('../utils/helpers');
-const { deleteFromCloudinary } = require('../utils/uploadHelpers');
+const { deleteLocalFile, getFileUrl } = require('../utils/uploadHelpers');
 
 // Upload single image
 const uploadSingle = async (req, res) => {
@@ -9,8 +9,8 @@ const uploadSingle = async (req, res) => {
     }
 
     sendSuccess(res, 'File uploaded successfully', {
-      url: req.file.path,
-      publicId: req.file.filename,
+      url: getFileUrl(req.file.filename),
+      filename: req.file.filename,
       originalName: req.file.originalname,
       size: req.file.size
     });
@@ -28,8 +28,8 @@ const uploadMultiple = async (req, res) => {
     }
 
     const files = req.files.map(file => ({
-      url: file.path,
-      publicId: file.filename,
+      url: getFileUrl(file.filename),
+      filename: file.filename,
       originalName: file.originalname,
       size: file.size
     }));
@@ -41,20 +41,23 @@ const uploadMultiple = async (req, res) => {
   }
 };
 
-// Delete image from Cloudinary
+// Delete image from local storage
 const deleteImage = async (req, res) => {
   try {
-    const { publicId } = req.params;
+    const filename = req.params[0]; // Handle nested paths with (*)
 
-    if (!publicId) {
-      return sendError(res, 'Public ID is required', 400);
+    if (!filename) {
+      return sendError(res, 'Filename is required', 400);
     }
 
-    const result = await deleteFromCloudinary(publicId);
+    console.log('Attempting to delete file:', filename);
+
+    const result = deleteLocalFile(filename);
     
-    if (result.result === 'ok') {
-      sendSuccess(res, 'Image deleted successfully');
+    if (result.success) {
+      sendSuccess(res, 'Image deleted successfully', { filename });
     } else {
+      console.error('File deletion failed:', result.error);
       sendError(res, 'Failed to delete image', 400);
     }
   } catch (error) {
@@ -66,12 +69,25 @@ const deleteImage = async (req, res) => {
 // Get upload statistics (Admin only)
 const getUploadStats = async (req, res) => {
   try {
-    // This would typically require tracking uploads in a database
-    // For now, return basic Cloudinary usage info
-    const stats = {
-      message: 'Upload statistics would be available with enhanced tracking',
-      note: 'Consider implementing upload tracking in database for detailed statistics'
+    const fs = require('fs');
+    const path = require('path');
+    const uploadDir = path.join(__dirname, '../uploads');
+    
+    let stats = {
+      totalFiles: 0,
+      totalSize: 0
     };
+
+    if (fs.existsSync(uploadDir)) {
+      const files = fs.readdirSync(uploadDir);
+      stats.totalFiles = files.length;
+      
+      files.forEach(file => {
+        const filePath = path.join(uploadDir, file);
+        const fileStats = fs.statSync(filePath);
+        stats.totalSize += fileStats.size;
+      });
+    }
 
     sendSuccess(res, 'Upload statistics retrieved', stats);
   } catch (error) {

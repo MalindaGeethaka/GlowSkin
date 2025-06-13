@@ -1,6 +1,7 @@
 const express = require('express');
 const { authenticate, isAdmin } = require('../middleware/auth');
 const { validateProduct } = require('../middleware/validation');
+const { uploadProduct } = require('../utils/uploadHelpers');
 const {
   createProduct,
   getAllProducts,
@@ -13,9 +14,9 @@ const {
 const router = express.Router();
 
 // @route   POST /api/products
-// @desc    Create a new product (Admin only)
+// @desc    Create a new product with image upload (Admin only)
 // @access  Private/Admin
-router.post('/', authenticate, isAdmin, validateProduct, createProduct);
+router.post('/', authenticate, isAdmin, uploadProduct.array('images', 5), validateProduct, createProduct);
 
 // @route   GET /api/products
 // @desc    Get all products with optional filtering
@@ -33,9 +34,9 @@ router.get('/stats', authenticate, isAdmin, getProductStats);
 router.get('/:id', getProductById);
 
 // @route   PUT /api/products/:id
-// @desc    Update a product (Admin only)
+// @desc    Update a product with optional image upload (Admin only)
 // @access  Private/Admin
-router.put('/:id', authenticate, isAdmin, validateProduct, updateProduct);
+router.put('/:id', authenticate, isAdmin, uploadProduct.array('images', 5), validateProduct, updateProduct);
 
 // @route   DELETE /api/products/:id
 // @desc    Delete a product (Admin only)

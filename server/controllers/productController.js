@@ -43,9 +43,7 @@ const getAllProducts = async (req, res) => {
     
     // Build sort object
     const sort = {};
-    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-    
-    const products = await Product.find(filter)
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;    const products = await Product.find(filter)
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit));
@@ -58,7 +56,7 @@ const getAllProducts = async (req, res) => {
         totalItems,
         itemsPerPage: parseInt(limit)
       }
-    });  } catch (error) {
+    });} catch (error) {
     console.error('Get all products error:', error);
     sendError(res, 'Server error retrieving products', 500);
   }
@@ -67,9 +65,7 @@ const getAllProducts = async (req, res) => {
 // Get product by ID
 const getProductById = async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    const product = await Product.findById(id);
+    const { id } = req.params;    const product = await Product.findById(id);
     if (!product) {
       return sendError(res, 'Product not found', 404);
     }
@@ -84,26 +80,21 @@ const getProductById = async (req, res) => {
 // Create product (Admin only)
 const createProduct = async (req, res) => {
   try {
-    const { title, description, price, stock, category, skinType, ingredients, usage } = req.body;
-    
-    // Handle image URLs from request (uploaded via multer)
-    const images = req.files ? req.files.map(file => file.path) : [];
+    const { title, description, price, stock, category, skinType, ingredients, usage, images, brand } = req.body;
     
     const product = new Product({
       title,
       description,
-      price,
-      stock,
+      price: parseFloat(price),
+      stock: parseInt(stock),
       category,
-      skinType,
-      ingredients,
+      brand: brand || 'GlowSkin', // Use provided brand or default
+      skinType: Array.isArray(skinType) ? skinType : [skinType], // Ensure it's an array
+      ingredients: ingredients ? (Array.isArray(ingredients) ? ingredients : ingredients.split(',').map(ing => ing.trim())) : [],
       usage,
-      images
-    });
-
-    await product.save();
-
-    sendSuccess(res, 'Product created successfully', product, 201);
+      images: images || [] // Use the images array from the request body
+    });const savedProduct = await product.save();
+    sendSuccess(res, 'Product created successfully', savedProduct, 201);
   } catch (error) {
     console.error('Create product error:', error);
     sendError(res, 'Server error creating product', 500);
@@ -114,7 +105,7 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, price, stock, category, skinType, ingredients, usage } = req.body;
+    const { title, description, price, stock, category, skinType, ingredients, usage, images, brand } = req.body;
     
     const product = await Product.findById(id);
     if (!product) {
@@ -127,14 +118,14 @@ const updateProduct = async (req, res) => {
     if (price) product.price = price;
     if (stock !== undefined) product.stock = stock;
     if (category) product.category = category;
+    if (brand) product.brand = brand;
     if (skinType) product.skinType = skinType;
     if (ingredients) product.ingredients = ingredients;
     if (usage) product.usage = usage;
     
-    // Handle new images if uploaded
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => file.path);
-      product.images = [...product.images, ...newImages];
+    // Handle images - replace with new array if provided
+    if (images !== undefined) {
+      product.images = images;
     }
 
     await product.save();

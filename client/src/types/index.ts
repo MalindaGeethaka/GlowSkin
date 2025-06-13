@@ -24,7 +24,10 @@ export interface Product {
   price: number;
   stock: number;
   category: string;
+  brand: string;
   skinType: string[];
+  ingredients?: string[];
+  usage?: string;
   images: string[];
   isActive: boolean;
   createdAt: string;

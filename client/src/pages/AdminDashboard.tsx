@@ -3,8 +3,9 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { userService } from '../services/userService';
-import { feedbackService } from '../services/feedbackService';
-import { Product, Order, User, Feedback } from '../types';
+import { Product, Order } from '../types';
+import ProductManagement from '../components/admin/ProductManagement';
+import ProductForm from '../components/admin/ProductForm';
 
 const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -210,17 +211,51 @@ const Overview: React.FC<{ stats: any; loading: boolean }> = ({ stats, loading }
   );
 };
 
-// Placeholder components for other admin sections
+// Product Management Component with Full Functionality
 const ProductsManager: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit'>('list');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const handleProductAction = (action: string, product?: Product) => {
+    switch (action) {
+      case 'create':
+        setCurrentView('create');
+        setSelectedProduct(null);
+        break;
+      case 'edit':
+        setCurrentView('edit');
+        setSelectedProduct(product || null);
+        break;
+      case 'delete':
+      case 'save':
+        setCurrentView('list');
+        setSelectedProduct(null);
+        break;
+      default:
+        setCurrentView('list');
+    }
+  };
+
+  const handleFormSave = (product: Product) => {
+    handleProductAction('save');
+  };
+
+  const handleFormCancel = () => {
+    handleProductAction('cancel');
+  };
+
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Product Management</h1>
-      <div className="bg-white p-6 rounded-lg shadow">
-        <p className="text-gray-600">Product management interface coming soon...</p>
-        <p className="text-sm text-gray-500 mt-2">
-          This will include CRUD operations for products, image uploads, inventory management, etc.
-        </p>
-      </div>
+      {currentView === 'list' && (
+        <ProductManagement onProductAction={handleProductAction} />
+      )}
+      {(currentView === 'create' || currentView === 'edit') && (
+        <ProductForm
+          product={selectedProduct || undefined}
+          onSave={handleFormSave}
+          onCancel={handleFormCancel}
+        />
+      )}
     </div>
   );
 };

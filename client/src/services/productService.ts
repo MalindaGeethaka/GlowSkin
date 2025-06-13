@@ -69,17 +69,15 @@ export const productService = {
   getSkinTypes: async (): Promise<string[]> => {
     const response = await api.get<ApiResponse<string[]>>('/products/skin-types');
     return response.data.data!;
-  },
-
-  // Upload product images
+  },  // Upload product images
   uploadImages: async (files: FileList): Promise<string[]> => {
     const formData = new FormData();
     Array.from(files).forEach(file => {
       formData.append('images', file);
     });
 
-    const response = await api.post<ApiResponse<string[]>>(
-      '/uploads/products',
+    const response = await api.post<ApiResponse<{ url: string; filename: string; originalName: string; size: number }[]>>(
+      '/uploads/images',
       formData,
       {
         headers: {
@@ -87,6 +85,6 @@ export const productService = {
         },
       }
     );
-    return response.data.data!;
+    return response.data.data!.map(file => file.url);
   },
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
+import { getImageUrl } from '../utils';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -159,10 +160,9 @@ const ProductsPage: React.FC = () => {
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {sortedProducts.map(product => (
-          <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <div className="aspect-w-1 aspect-h-1">
+          <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">            <div className="aspect-w-1 aspect-h-1">
               <img
-                src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder-product.jpg'}
+                src={product.images && product.images.length > 0 ? getImageUrl(product.images[0]) : '/placeholder-product.jpg'}
                 alt={product.title}
                 className="w-full h-48 object-cover"
               />

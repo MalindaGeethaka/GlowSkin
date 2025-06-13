@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
+import { getImageUrl } from '../utils';
 
 const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -132,10 +133,9 @@ const HomePage: React.FC = () => {
             <div className="grid md:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
                 <div key={product._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="h-48 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
-                    {product.images && product.images.length > 0 ? (
+                  <div className="h-48 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">                    {product.images && product.images.length > 0 ? (
                       <img 
-                        src={product.images[0]} 
+                        src={getImageUrl(product.images[0])} 
                         alt={product.title}
                         className="w-full h-full object-cover"
                       />
