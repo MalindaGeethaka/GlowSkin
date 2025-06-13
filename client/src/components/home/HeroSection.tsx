@@ -6,20 +6,74 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ isVisible }) => {
-  return (
-    <section 
+  return (    <section 
       className="relative bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 overflow-hidden flex items-center justify-center"
       style={{ 
         height: 'calc(100vh - 4rem)', // Subtract navbar height (h-16 = 4rem)
         minHeight: '600px' // Ensure minimum height on very small screens
       }}
     >
-      {/* Subtle Background Elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
-        <div className="absolute top-40 right-20 w-40 h-40 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/3 w-36 h-36 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-4000"></div>
-      </div>      {/* Main Content - Perfectly Centered */}
+      {/* Dynamic Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Animated Gradient Mesh */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-indigo-400/20 animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-yellow-300/15 via-pink-300/15 to-blue-300/15 animate-float"></div>
+        </div>        {/* Floating Geometric Shapes */}
+        <div className="absolute inset-0 opacity-20">
+          {/* Large decorative circles with morph animation */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-pink-300 to-rose-400 mix-blend-multiply filter blur-xl animate-morph animation-delay-1000"></div>
+          <div className="absolute top-32 right-16 w-48 h-48 bg-gradient-to-br from-purple-300 to-violet-400 mix-blend-multiply filter blur-2xl animate-drift animation-delay-2000"></div>
+          <div className="absolute bottom-24 left-1/4 w-40 h-40 bg-gradient-to-br from-indigo-300 to-blue-400 mix-blend-multiply filter blur-xl animate-float-large animation-delay-4000"></div>
+          <div className="absolute top-1/2 right-8 w-28 h-28 bg-gradient-to-br from-yellow-300 to-orange-400 mix-blend-multiply filter blur-lg animate-morph animation-delay-1000"></div>
+          
+          {/* Medium shapes with drift animation */}
+          <div className="absolute top-3/4 right-1/3 w-24 h-24 bg-gradient-to-br from-emerald-300 to-teal-400 mix-blend-multiply filter blur-lg animate-drift animation-delay-3000"></div>
+          <div className="absolute top-16 left-2/3 w-20 h-20 bg-gradient-to-br from-rose-300 to-pink-400 mix-blend-multiply filter blur-md animate-float-large animation-delay-5000"></div>
+          
+          {/* Small floating elements */}
+          <div className="absolute top-1/3 left-1/5 w-16 h-16 bg-gradient-to-br from-cyan-300 to-blue-400 mix-blend-multiply filter blur-md animate-morph animation-delay-2000"></div>
+          <div className="absolute bottom-1/2 right-1/4 w-12 h-12 bg-gradient-to-br from-amber-300 to-yellow-400 mix-blend-multiply filter blur-sm animate-drift animation-delay-4000"></div>
+        </div>        {/* Skincare-themed Floating Elements */}
+        <div className="absolute inset-0 opacity-15">
+          {/* Droplet shapes with enhanced animations */}
+          <div className="absolute top-20 left-1/4 w-6 h-8 bg-gradient-to-b from-blue-400 to-cyan-500 rounded-full animate-float animation-delay-1000 transform rotate-45"></div>
+          <div className="absolute top-1/3 right-1/4 w-4 h-6 bg-gradient-to-b from-pink-400 to-rose-500 rounded-full animate-drift animation-delay-3000 transform rotate-12"></div>
+          <div className="absolute bottom-1/3 left-1/6 w-5 h-7 bg-gradient-to-b from-purple-400 to-violet-500 rounded-full animate-float-large animation-delay-2000 transform -rotate-25"></div>
+          <div className="absolute top-2/3 right-1/6 w-3 h-5 bg-gradient-to-b from-indigo-400 to-blue-500 rounded-full animate-drift animation-delay-4000 transform rotate-75"></div>
+          
+          {/* Enhanced sparkle effects with twinkle animation */}
+          <div className="absolute top-1/4 left-3/4 w-3 h-3 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full animate-twinkle animation-delay-1000"></div>
+          <div className="absolute top-3/4 left-1/5 w-2 h-2 bg-gradient-to-br from-pink-300 to-rose-400 rounded-full animate-twinkle animation-delay-2000"></div>
+          <div className="absolute top-1/2 right-1/5 w-4 h-4 bg-gradient-to-br from-purple-300 to-violet-400 rounded-full animate-twinkle animation-delay-3000"></div>
+          <div className="absolute top-1/6 left-1/2 w-2.5 h-2.5 bg-gradient-to-br from-emerald-300 to-teal-400 rounded-full animate-twinkle animation-delay-4000"></div>
+          <div className="absolute bottom-1/4 right-2/3 w-3.5 h-3.5 bg-gradient-to-br from-orange-300 to-yellow-400 rounded-full animate-twinkle animation-delay-5000"></div>
+          
+          {/* Floating geometric particles */}
+          <div className="absolute top-2/5 left-1/3 w-2 h-2 bg-pink-400 transform rotate-45 animate-drift animation-delay-1000"></div>
+          <div className="absolute bottom-2/5 right-1/3 w-1.5 h-1.5 bg-purple-400 transform rotate-12 animate-float animation-delay-2000"></div>
+          <div className="absolute top-4/5 left-2/5 w-2.5 h-2.5 bg-indigo-400 transform -rotate-30 animate-twinkle animation-delay-3000"></div>
+        </div>        {/* Dynamic Wave Pattern */}
+        <div className="absolute bottom-0 left-0 w-full opacity-30">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-24 text-pink-200 animate-wave-motion">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="currentColor"></path>
+          </svg>
+        </div>
+        
+        {/* Top decorative wave */}
+        <div className="absolute top-0 left-0 w-full opacity-20 transform rotate-180">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-20 text-purple-200 animate-wave-motion animation-delay-2000">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="currentColor"></path>
+          </svg>
+        </div>
+        
+        {/* Additional middle wave layer for depth */}
+        <div className="absolute top-1/2 left-0 w-full opacity-10 transform -translate-y-1/2">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-16 text-indigo-200 animate-wave-motion animation-delay-4000">
+            <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" fill="currentColor"></path>
+          </svg>
+        </div>
+      </div>{/* Main Content - Perfectly Centered */}
       <div className={`relative z-10 w-full px-4 sm:px-6 lg:px-8 transform transition-all duration-1000 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}>
