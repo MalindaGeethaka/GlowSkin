@@ -427,9 +427,8 @@ const ProfilePage: React.FC = () => {
                         <p className="text-gray-900">{order.shippingAddress.address}, {order.shippingAddress.city}</p>
                         <p className="text-gray-900">{order.shippingAddress.phone}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-pink-600">
-                          Total: Rs. {order.totalPrice.toLocaleString()}
+                      <div className="text-right">                        <p className="text-lg font-bold text-pink-600">
+                          Total: Rs. {(order.totalAmount || order.totalPrice || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>

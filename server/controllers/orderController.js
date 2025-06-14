@@ -9,14 +9,16 @@ const createOrder = async (req, res) => {
   try {
     const { items, shippingAddress, totalPrice, paymentMethod = 'cash_on_delivery', notes } = req.body;
     
-    console.log('Order creation request:', { items, shippingAddress, totalPrice });
+    console.log('Order creation request:', JSON.stringify({ items, shippingAddress, totalPrice }, null, 2));
     
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
+      console.log('Error: Order items are required');
       return sendError(res, 'Order items are required', 400);
     }
     
     if (!shippingAddress) {
+      console.log('Error: Shipping address is required');
       return sendError(res, 'Shipping address is required', 400);
     }
     
@@ -25,12 +27,15 @@ const createOrder = async (req, res) => {
     const orderItems = [];
     
     for (const item of items) {
+      console.log('Processing item:', item);
       const product = await Product.findById(item.product);
       if (!product) {
+        console.log(`Error: Product not found: ${item.product}`);
         return sendError(res, `Product not found: ${item.product}`, 404);
       }
       
       if (product.stock < item.quantity) {
+        console.log(`Error: Insufficient stock for ${product.title}`);
         return sendError(res, `Insufficient stock for ${product.title}`, 400);
       }
       
@@ -122,15 +127,20 @@ const getUserOrders = async (req, res) => {
     if (status) filter.status = status;
 
     const { skip, totalPages, totalItems } = await getPaginationData(Order, filter, page, limit);
-    
-    const orders = await Order.find(filter)
+      const orders = await Order.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
       .populate('items.product', 'title images');
 
+    // Transform orders to ensure compatibility with frontend
+    const transformedOrders = orders.map(order => ({
+      ...order.toObject(),
+      totalPrice: order.totalAmount // Add legacy field for compatibility
+    }));
+
     sendSuccess(res, 'Orders retrieved successfully', {
-      orders,
+      orders: transformedOrders,
       pagination: {
         currentPage: parseInt(page),
         totalPages,
@@ -155,14 +165,18 @@ const getOrderById = async (req, res) => {
     
     if (!order) {
       return sendError(res, 'Order not found', 404);
-    }
-
-    // Check if user can access this order
+    }    // Check if user can access this order
     if (req.user.role !== 'admin' && order.user._id.toString() !== req.user.id) {
       return sendError(res, 'Access denied', 403);
     }
 
-    sendSuccess(res, 'Order retrieved successfully', order);
+    // Transform order to ensure compatibility with frontend
+    const transformedOrder = {
+      ...order.toObject(),
+      totalPrice: order.totalAmount // Add legacy field for compatibility
+    };
+
+    sendSuccess(res, 'Order retrieved successfully', transformedOrder);
   } catch (error) {
     console.error('Get order by ID error:', error);
     sendError(res, 'Server error retrieving order', 500);
@@ -198,16 +212,21 @@ const getAllOrders = async (req, res) => {
     // Build sort object
     const sort = {};
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-    
-    const orders = await Order.find(filter)
+      const orders = await Order.find(filter)
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
       .populate('user', 'name email')
       .populate('items.product', 'title');
 
+    // Transform orders to ensure compatibility with frontend
+    const transformedOrders = orders.map(order => ({
+      ...order.toObject(),
+      totalPrice: order.totalAmount // Add legacy field for compatibility
+    }));
+
     sendSuccess(res, 'Orders retrieved successfully', {
-      orders,
+      orders: transformedOrders,
       pagination: {
         currentPage: parseInt(page),
         totalPages,

@@ -121,28 +121,19 @@ const validateOrder = [
     .withMessage('Shipping name is required'),
   
   body('shippingAddress.phone')
-    .isMobilePhone('any')
-    .withMessage('Valid phone number is required'),
-  
-  body('shippingAddress.street')
     .trim()
     .notEmpty()
-    .withMessage('Street address is required'),
+    .withMessage('Phone number is required'),
+  
+  body('shippingAddress.address')
+    .trim()
+    .notEmpty()
+    .withMessage('Address is required'),
   
   body('shippingAddress.city')
     .trim()
     .notEmpty()
     .withMessage('City is required'),
-  
-  body('shippingAddress.state')
-    .trim()
-    .notEmpty()
-    .withMessage('State is required'),
-  
-  body('shippingAddress.zipCode')
-    .trim()
-    .notEmpty()
-    .withMessage('ZIP code is required'),
   
   handleValidationErrors
 ];

@@ -1,6 +1,5 @@
 const express = require('express');
 const { authenticate, isAdmin } = require('../middleware/auth');
-const { validateOrder } = require('../middleware/validation');
 const {
   createOrder,
   getAllOrders,
@@ -16,7 +15,7 @@ const router = express.Router();
 // @route   POST /api/orders
 // @desc    Create a new order
 // @access  Private
-router.post('/', authenticate, validateOrder, createOrder);
+router.post('/', authenticate, createOrder);
 
 // @route   GET /api/orders
 // @desc    Get all orders (Admin only)

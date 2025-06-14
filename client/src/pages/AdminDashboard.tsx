@@ -59,7 +59,7 @@ const AdminDashboard: React.FC = () => {
         userService.getUsers({ limit: 1 })
       ]);      // Calculate total revenue from all orders
       const allOrders = await orderService.getOrders({ limit: 1000 });
-      const totalRevenue = allOrders.data?.orders?.reduce((sum, order) => sum + order.totalPrice, 0) || 0;
+      const totalRevenue = allOrders.data?.orders?.reduce((sum, order) => sum + (order.totalAmount || order.totalPrice || 0), 0) || 0;
 
       setStats({
         totalProducts: productsData.data?.pagination.totalItems || 0,
@@ -465,9 +465,8 @@ const OrdersManager: React.FC = () => {
                     </h3>
                     <p className="text-gray-600">
                       Customer: {typeof order.user === 'object' ? order.user.name : 'N/A'}
-                    </p>
-                    <p className="text-gray-600">
-                      Total: Rs. {order.totalPrice.toLocaleString()}
+                    </p>                    <p className="text-gray-600">
+                      Total: Rs. {(order.totalAmount || order.totalPrice || 0).toLocaleString()}
                     </p>
                   </div>
                   <div>
@@ -483,9 +482,8 @@ const OrdersManager: React.FC = () => {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {order.items.length} items • Placed on {new Date(order.createdAt).toLocaleDateString()}
+                </div>                <div className="text-sm text-gray-600">
+                  {order.items?.length || 0} items • Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
                 </div>
               </div>
             ))}

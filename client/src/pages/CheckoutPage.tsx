@@ -79,6 +79,8 @@ const CheckoutPage: React.FC = () => {
         shippingAddress: shippingForm
       };
 
+      console.log('Sending order data:', orderData);
+
       const order = await orderService.createOrder(orderData);
       
       clearCart();
@@ -87,9 +89,10 @@ const CheckoutPage: React.FC = () => {
           message: 'Order placed successfully! You will receive a confirmation email shortly.',
           orderId: order._id 
         } 
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to place order. Please try again.');
+      });    } catch (err: any) {
+      console.error('Order creation error:', err);
+      console.error('Error response:', err.response?.data);
+      setError(err.response?.data?.message || err.message || 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }

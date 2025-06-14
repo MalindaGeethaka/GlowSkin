@@ -64,7 +64,8 @@ export interface Order {
     quantity: number;
     price: number;
   }[];
-  totalPrice: number;
+  totalAmount: number;
+  totalPrice?: number; // Legacy support
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: {
     name: string;
