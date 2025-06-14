@@ -13,9 +13,8 @@ const ProductsPage: React.FC = () => {  const [products, setProducts] = useState
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSkinType, setSelectedSkinType] = useState('');
   const [sortBy, setSortBy] = useState('name');  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
-  const { addToCart } = useCart();
+  const [filtersOpen, setFiltersOpen] = useState(false);  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+  const { addToCartSimple } = useCart();
 
   const categories = ['Cleansers', 'Moisturizers', 'Serums', 'Sunscreens', 'Toners', 'Face Masks', 'Eye Care', 'Treatments', 'Body Care', 'Lip Care'];
   const skinTypes = ['Oily', 'Dry', 'Combination', 'Sensitive', 'Normal', 'All Types'];
@@ -38,7 +37,6 @@ const ProductsPage: React.FC = () => {  const [products, setProducts] = useState
       setLoading(false);
     }
   };
-
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchProducts();
@@ -46,8 +44,16 @@ const ProductsPage: React.FC = () => {  const [products, setProducts] = useState
 
     return () => clearTimeout(timeoutId);
   }, [searchTerm, selectedCategory, selectedSkinType, sortBy]);
+  // Cleanup function to clear all pending cart timeouts
+  useEffect(() => {
+    return () => {
+      // No timeouts to clear in simplified version
+    };
+  }, []);
+
   const handleAddToCart = (product: Product) => {
-    addToCart(product);
+    console.log(`[ProductsPage] handleAddToCart called for: ${product.title}, Timestamp: ${Date.now()}`);
+    addToCartSimple(product);
   };
 
   const toggleWishlist = (productId: string) => {

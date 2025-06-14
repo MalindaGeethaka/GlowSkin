@@ -12,12 +12,9 @@ const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);  const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const { addToCart } = useCart();
-
-  useEffect(() => {
+  const { addToCart } = useCart();  useEffect(() => {
     if (id) {
       fetchProduct(id);
     }
@@ -32,12 +29,10 @@ const ProductDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAddToCart = () => {
+  };  const handleAddToCart = () => {
     if (product) {
+      console.log(`[ProductDetailPage] handleAddToCart called for: ${product.title}, Quantity: ${quantity}`);
       addToCart(product, quantity);
-      // Show a success message or animation here
     }
   };
 

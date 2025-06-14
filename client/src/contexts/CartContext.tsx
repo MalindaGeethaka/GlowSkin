@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product, CartItem, CartContextType } from '../types';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -23,7 +23,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        setItems(JSON.parse(savedCart));
+        const cartItems = JSON.parse(savedCart);
+        setItems(cartItems);
       } catch (error) {
         console.error('Error loading cart from localStorage:', error);
       }
@@ -35,17 +36,45 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (product: Product, quantity: number = 1): void => {
+  const addToCart = useCallback((product: Product, quantity: number = 1): void => {
+    console.log(`[CartContext] addToCart called - Product: ${product.title}, Quantity: ${quantity}`);
+    
     setItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(item => item.product._id === product._id);
       
       if (existingItemIndex >= 0) {
-        // Update quantity if item already exists
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex].quantity += quantity;
+        console.log(`[CartContext] Updated quantity to: ${updatedItems[existingItemIndex].quantity}`);
         return updatedItems;
       } else {
-        // Add new item
+        const newItem: CartItem = {
+          _id: `cart-${product._id}-${Date.now()}`,
+          product,
+          quantity,
+        };
+        console.log(`[CartContext] Added new item with quantity: ${quantity}`);
+        return [...prevItems, newItem];
+      }
+    });
+  }, []);
+
+  const addToCartSimple = useCallback((product: Product): void => {
+    console.log(`[CartContext] addToCartSimple called - Product: ${product.title}`);
+    addToCart(product, 1);
+  }, [addToCart]);
+
+  const setCartQuantity = useCallback((product: Product, quantity: number): void => {
+    console.log(`[CartContext] setCartQuantity called - Product: ${product.title}, Quantity: ${quantity}`);
+    
+    setItems(prevItems => {
+      const existingItemIndex = prevItems.findIndex(item => item.product._id === product._id);
+      
+      if (existingItemIndex >= 0) {
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex].quantity = quantity;
+        return updatedItems;
+      } else {
         const newItem: CartItem = {
           _id: `cart-${product._id}-${Date.now()}`,
           product,
@@ -54,13 +83,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return [...prevItems, newItem];
       }
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string): void => {
+  const removeFromCart = useCallback((productId: string): void => {
     setItems(prevItems => prevItems.filter(item => item.product._id !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number): void => {
+  const updateQuantity = useCallback((productId: string, quantity: number): void => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -73,11 +102,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           : item
       )
     );
-  };
+  }, [removeFromCart]);
 
-  const clearCart = (): void => {
+  const clearCart = useCallback((): void => {
     setItems([]);
-  };
+  }, []);
 
   const getTotalItems = (): number => {
     return items.reduce((total, item) => total + item.quantity, 0);
@@ -90,6 +119,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const value: CartContextType = {
     items,
     addToCart,
+    addToCartSimple,
+    setCartQuantity,
     removeFromCart,
     updateQuantity,
     clearCart,
