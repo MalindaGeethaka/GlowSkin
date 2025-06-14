@@ -132,8 +132,29 @@ const sendWelcomeEmail = async (userEmail, userName) => {
   }
 };
 
+// Generic send email function
+const sendEmail = async (to, subject, htmlContent) => {
+  const transporter = createTransporter();
+  
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html: htmlContent
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent successfully to ${to}`);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendOrderConfirmationEmail,
   sendOrderStatusUpdateEmail,
-  sendWelcomeEmail
+  sendWelcomeEmail,
+  sendEmail
 };

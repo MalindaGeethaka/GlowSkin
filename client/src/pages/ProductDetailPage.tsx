@@ -5,6 +5,7 @@ import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { getImageUrl } from '../utils';
 import { ArrowLeft, ShoppingCart, Star, Shield, Truck, RefreshCw, Heart } from 'lucide-react';
+import ProductReviews from '../components/product/ProductReviews';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -263,8 +264,7 @@ const ProductDetailPage: React.FC = () => {
                     <p className="text-xs text-gray-600">30-day return policy</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
                     <Heart className="w-5 h-5 text-pink-600" />
                   </div>
@@ -276,6 +276,15 @@ const ProductDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Product Reviews Section */}
+        <div className="mt-16">
+          <ProductReviews
+            productId={product._id}
+            initialReviews={product.reviews}
+            initialRatings={product.ratings}
+          />
         </div>
       </div>
     </div>

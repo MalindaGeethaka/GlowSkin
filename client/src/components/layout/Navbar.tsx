@@ -41,9 +41,7 @@ const Navbar: React.FC = () => {
             <span className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
               GlowSkin
             </span>
-          </Link>
-
-          {/* Desktop Menu */}
+          </Link>          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-pink-500 transition-colors">
               Home
@@ -51,11 +49,15 @@ const Navbar: React.FC = () => {
             <Link to="/products" className="text-gray-700 hover:text-pink-500 transition-colors">
               Products
             </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-pink-500 transition-colors">
+              Contact
+            </Link>
             {user?.role === 'admin' && (
               <Link to="/admin" className="text-gray-700 hover:text-pink-500 transition-colors">
                 Dashboard
-              </Link>            )}
-          </div>          {/* Desktop Actions */}
+              </Link>
+            )}
+          </div>{/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-6">
             <Link 
               to="/cart" 
@@ -161,9 +163,7 @@ const Navbar: React.FC = () => {
               )}
             </svg>
           </button>
-        </div>
-
-        {/* Mobile Menu */}
+        </div>        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
@@ -172,6 +172,9 @@ const Navbar: React.FC = () => {
               </Link>
               <Link to="/products" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Products
+              </Link>
+              <Link to="/contact" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                Contact
               </Link>
               {user?.role === 'admin' && (
                 <Link to="/admin" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>

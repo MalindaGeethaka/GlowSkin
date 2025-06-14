@@ -7,40 +7,64 @@ const { sendEmail } = require('../utils/emailService');
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, notes } = req.body;
+    const { items, shippingAddress, totalPrice, paymentMethod = 'cash_on_delivery', notes } = req.body;
+    
+    console.log('Order creation request:', { items, shippingAddress, totalPrice });
+    
+    // Validate required fields
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return sendError(res, 'Order items are required', 400);
+    }
+    
+    if (!shippingAddress) {
+      return sendError(res, 'Shipping address is required', 400);
+    }
     
     // Validate and calculate total
-    let totalPrice = 0;
+    let calculatedTotal = 0;
     const orderItems = [];
     
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+      const product = await Product.findById(item.product);
       if (!product) {
-        return sendError(res, `Product not found: ${item.productId}`, 404);
+        return sendError(res, `Product not found: ${item.product}`, 404);
       }
       
       if (product.stock < item.quantity) {
         return sendError(res, `Insufficient stock for ${product.title}`, 400);
       }
       
-      const itemTotal = product.price * item.quantity;
-      totalPrice += itemTotal;
+      const itemTotal = (item.price || product.price) * item.quantity;
+      calculatedTotal += itemTotal;
       
       orderItems.push({
-        productId: product._id,
-        title: product.title,
-        price: product.price,
+        product: product._id,
         quantity: item.quantity,
-        subtotal: itemTotal
+        price: item.price || product.price,
+        total: itemTotal
       });
     }
 
-    // Create order
+    // Generate order number
+    const orderNumber = 'GS' + Date.now();
+
+    // Create order with the correct field mapping
     const order = new Order({
-      userId: req.user.id,
+      user: req.user.id,
+      orderNumber,
       items: orderItems,
-      totalPrice,
-      shippingAddress,
+      subtotal: calculatedTotal,
+      shippingFee: 500, // Standard shipping fee
+      totalAmount: totalPrice || (calculatedTotal + 500),
+      shippingAddress: {
+        name: shippingAddress.name,
+        phone: shippingAddress.phone,
+        street: shippingAddress.address, // Map 'address' to 'street'
+        city: shippingAddress.city,
+        state: 'Western', // Default state
+        zipCode: '00000', // Default zip
+        country: 'Sri Lanka'
+      },
       paymentMethod,
       notes
     });
@@ -50,24 +74,39 @@ const createOrder = async (req, res) => {
     // Update product stocks
     for (const item of items) {
       await Product.findByIdAndUpdate(
-        item.productId,
+        item.product,
         { $inc: { stock: -item.quantity } }
       );
     }
 
+    // Populate order details for response
+    const populatedOrder = await Order.findById(order._id)
+      .populate('user', 'name email')
+      .populate('items.product', 'title images');
+
     // Send order confirmation email
     try {
       const user = await User.findById(req.user.id);
-      await sendEmail(
-        user.email,
-        'Order Confirmation - GlowSkin',
-        `Thank you for your order! Order ID: ${order._id}. Total: LKR ${totalPrice.toFixed(2)}`
-      );
+      if (user && user.email) {
+        await sendEmail(
+          user.email,
+          'Order Confirmation - GlowSkin',
+          `
+            <h2>Thank you for your order!</h2>
+            <p>Dear ${user.name},</p>
+            <p>Your order has been successfully placed.</p>
+            <p><strong>Order Number:</strong> ${orderNumber}</p>
+            <p><strong>Total Amount:</strong> Rs. ${(totalPrice || (calculatedTotal + 500)).toLocaleString()}</p>
+            <p>We'll send you another email when your order is shipped.</p>
+            <p>Thank you for choosing GlowSkin!</p>
+          `
+        );
+      }
     } catch (emailError) {
       console.error('Order confirmation email failed:', emailError);
     }
 
-    sendSuccess(res, 'Order created successfully', order, 201);
+    sendSuccess(res, 'Order created successfully', populatedOrder, 201);
   } catch (error) {
     console.error('Create order error:', error);
     sendError(res, 'Server error creating order', 500);
@@ -79,7 +118,7 @@ const getUserOrders = async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
     
-    const filter = { userId: req.user.id };
+    const filter = { user: req.user.id };
     if (status) filter.status = status;
 
     const { skip, totalPages, totalItems } = await getPaginationData(Order, filter, page, limit);
@@ -88,7 +127,7 @@ const getUserOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('items.productId', 'title images');
+      .populate('items.product', 'title images');
 
     sendSuccess(res, 'Orders retrieved successfully', {
       orders,
@@ -111,15 +150,15 @@ const getOrderById = async (req, res) => {
     const { id } = req.params;
     
     const order = await Order.findById(id)
-      .populate('userId', 'firstName lastName email')
-      .populate('items.productId', 'title images');
+      .populate('user', 'name email')
+      .populate('items.product', 'title images');
     
     if (!order) {
       return sendError(res, 'Order not found', 404);
     }
 
     // Check if user can access this order
-    if (req.user.role !== 'admin' && order.userId._id.toString() !== req.user.id) {
+    if (req.user.role !== 'admin' && order.user._id.toString() !== req.user.id) {
       return sendError(res, 'Access denied', 403);
     }
 
@@ -147,7 +186,7 @@ const getAllOrders = async (req, res) => {
     // Build filter object
     const filter = {};
     if (status) filter.status = status;
-    if (userId) filter.userId = userId;
+    if (userId) filter.user = userId;
     if (startDate || endDate) {
       filter.createdAt = {};
       if (startDate) filter.createdAt.$gte = new Date(startDate);
@@ -164,8 +203,8 @@ const getAllOrders = async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('userId', 'firstName lastName email')
-      .populate('items.productId', 'title');
+      .populate('user', 'name email')
+      .populate('items.product', 'title');
 
     sendSuccess(res, 'Orders retrieved successfully', {
       orders,
@@ -188,7 +227,7 @@ const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status, trackingNumber } = req.body;
     
-    const order = await Order.findById(id).populate('userId', 'firstName lastName email');
+    const order = await Order.findById(id).populate('user', 'name email');
     if (!order) {
       return sendError(res, 'Order not found', 404);
     }
@@ -197,21 +236,13 @@ const updateOrderStatus = async (req, res) => {
     order.status = status;
     if (trackingNumber) order.trackingNumber = trackingNumber;
 
-    // Update timestamps based on status
-    if (status === 'confirmed' && oldStatus === 'pending') {
-      order.confirmedAt = new Date();
-    } else if (status === 'shipped' && oldStatus !== 'shipped') {
-      order.shippedAt = new Date();
-    } else if (status === 'delivered' && oldStatus !== 'delivered') {
-      order.deliveredAt = new Date();
-    }
-
     await order.save();
 
     // Send status update email
     try {
       const statusMessages = {
         confirmed: 'Your order has been confirmed and is being prepared.',
+        processing: 'Your order is being processed.',
         shipped: `Your order has been shipped${trackingNumber ? ` with tracking number: ${trackingNumber}` : ''}.`,
         delivered: 'Your order has been delivered. Thank you for shopping with GlowSkin!',
         cancelled: 'Your order has been cancelled.'
@@ -219,9 +250,15 @@ const updateOrderStatus = async (req, res) => {
 
       if (statusMessages[status]) {
         await sendEmail(
-          order.userId.email,
+          order.user.email,
           `Order Update - GlowSkin`,
-          `Hello ${order.userId.firstName}, ${statusMessages[status]} Order ID: ${order._id}`
+          `
+            <h2>Order Status Update</h2>
+            <p>Hello ${order.user.name},</p>
+            <p>${statusMessages[status]}</p>
+            <p><strong>Order Number:</strong> ${order.orderNumber}</p>
+            <p>Thank you for choosing GlowSkin!</p>
+          `
         );
       }
     } catch (emailError) {
@@ -247,7 +284,7 @@ const cancelOrder = async (req, res) => {
     }
 
     // Check if user can cancel this order
-    if (req.user.role !== 'admin' && order.userId.toString() !== req.user.id) {
+    if (req.user.role !== 'admin' && order.user.toString() !== req.user.id) {
       return sendError(res, 'Access denied', 403);
     }
 
@@ -257,7 +294,6 @@ const cancelOrder = async (req, res) => {
     }
 
     order.status = 'cancelled';
-    order.cancelledAt = new Date();
     if (reason) order.cancellationReason = reason;
 
     await order.save();
@@ -265,7 +301,7 @@ const cancelOrder = async (req, res) => {
     // Restore product stocks
     for (const item of order.items) {
       await Product.findByIdAndUpdate(
-        item.productId,
+        item.product,
         { $inc: { stock: item.quantity } }
       );
     }

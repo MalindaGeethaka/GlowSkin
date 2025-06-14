@@ -17,6 +17,17 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Review {
+  _id: string;
+  user: {
+    _id: string;
+    name: string;
+  };
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
 export interface Product {
   _id: string;
   title: string;
@@ -30,6 +41,11 @@ export interface Product {
   usage?: string;
   images: string[];
   isActive: boolean;
+  ratings?: {
+    average: number;
+    count: number;
+  };
+  reviews?: Review[];
   createdAt: string;
   updatedAt: string;
 }
@@ -64,7 +80,26 @@ export interface Feedback {
   _id: string;
   user: string | User;
   message: string;
+  subject?: string;
+  type: 'general' | 'product' | 'order' | 'complaint';
+  status: 'pending' | 'resolved' | 'closed';
   isRead: boolean;
+  adminResponse?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Inquiry {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  type: 'general' | 'product' | 'order' | 'complaint';
+  status: 'pending' | 'resolved' | 'closed';
+  isRead: boolean;
+  adminResponse?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -245,6 +245,163 @@ const getProductStats = async (req, res) => {
   }
 };
 
+// Add product review
+const addProductReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    
+    // Validate input
+    if (!rating || rating < 1 || rating > 5) {
+      return sendError(res, 'Rating must be between 1 and 5', 400);
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return sendError(res, 'Product not found', 404);
+    }
+
+    // Check if user already reviewed this product
+    const existingReview = product.reviews.find(
+      review => review.user.toString() === req.user.id
+    );
+
+    if (existingReview) {
+      return sendError(res, 'You have already reviewed this product', 400);
+    }
+
+    // Add new review
+    const newReview = {
+      user: req.user.id,
+      rating: parseInt(rating),
+      comment: comment || '',
+      createdAt: new Date()
+    };
+
+    product.reviews.push(newReview);
+    product.updateRatings();
+    
+    await product.save();
+
+    // Populate the user info for the response
+    await product.populate('reviews.user', 'name');
+
+    sendSuccess(res, 'Review added successfully', {
+      review: product.reviews[product.reviews.length - 1],
+      ratings: product.ratings
+    }, 201);
+  } catch (error) {
+    console.error('Add review error:', error);
+    sendError(res, 'Server error adding review', 500);
+  }
+};
+
+// Get product reviews
+const getProductReviews = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const product = await Product.findById(id)
+      .populate('reviews.user', 'name')
+      .select('reviews ratings');
+
+    if (!product) {
+      return sendError(res, 'Product not found', 404);
+    }
+
+    // Paginate reviews
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const totalReviews = product.reviews.length;
+    const totalPages = Math.ceil(totalReviews / parseInt(limit));
+    
+    const paginatedReviews = product.reviews
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(skip, skip + parseInt(limit));
+
+    sendSuccess(res, 'Reviews retrieved successfully', {
+      reviews: paginatedReviews,
+      ratings: product.ratings,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalItems: totalReviews,
+        itemsPerPage: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get reviews error:', error);
+    sendError(res, 'Server error retrieving reviews', 500);
+  }
+};
+
+// Update product review
+const updateProductReview = async (req, res) => {
+  try {
+    const { id, reviewId } = req.params;
+    const { rating, comment } = req.body;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return sendError(res, 'Product not found', 404);
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review) {
+      return sendError(res, 'Review not found', 404);
+    }
+
+    // Check if user owns this review
+    if (review.user.toString() !== req.user.id) {
+      return sendError(res, 'Access denied', 403);
+    }
+
+    // Update review
+    if (rating) review.rating = parseInt(rating);
+    if (comment !== undefined) review.comment = comment;
+
+    product.updateRatings();
+    await product.save();
+
+    sendSuccess(res, 'Review updated successfully', review);
+  } catch (error) {
+    console.error('Update review error:', error);
+    sendError(res, 'Server error updating review', 500);
+  }
+};
+
+// Delete product review
+const deleteProductReview = async (req, res) => {
+  try {
+    const { id, reviewId } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return sendError(res, 'Product not found', 404);
+    }
+
+    const review = product.reviews.id(reviewId);
+    if (!review) {
+      return sendError(res, 'Review not found', 404);
+    }
+
+    // Check if user owns this review or is admin
+    if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return sendError(res, 'Access denied', 403);
+    }
+
+    // Remove review
+    product.reviews.pull(reviewId);
+    product.updateRatings();
+    await product.save();
+
+    sendSuccess(res, 'Review deleted successfully');
+  } catch (error) {
+    console.error('Delete review error:', error);
+    sendError(res, 'Server error deleting review', 500);
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
@@ -254,5 +411,9 @@ module.exports = {
   getCategories,
   getFeaturedProducts,
   updateStock,
-  getProductStats
+  getProductStats,
+  addProductReview,
+  getProductReviews,
+  updateProductReview,
+  deleteProductReview
 };

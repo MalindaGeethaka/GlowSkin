@@ -8,7 +8,11 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
-  getProductStats
+  getProductStats,
+  addProductReview,
+  getProductReviews,
+  updateProductReview,
+  deleteProductReview
 } = require('../controllers/productController');
 
 const router = express.Router();
@@ -42,5 +46,27 @@ router.put('/:id', authenticate, isAdmin, uploadProduct.array('images', 5), vali
 // @desc    Delete a product (Admin only)
 // @access  Private/Admin
 router.delete('/:id', authenticate, isAdmin, deleteProduct);
+
+// Product Reviews Routes
+
+// @route   POST /api/products/:id/reviews
+// @desc    Add a review to a product
+// @access  Private
+router.post('/:id/reviews', authenticate, addProductReview);
+
+// @route   GET /api/products/:id/reviews
+// @desc    Get all reviews for a product
+// @access  Public
+router.get('/:id/reviews', getProductReviews);
+
+// @route   PUT /api/products/:id/reviews/:reviewId
+// @desc    Update a review
+// @access  Private
+router.put('/:id/reviews/:reviewId', authenticate, updateProductReview);
+
+// @route   DELETE /api/products/:id/reviews/:reviewId
+// @desc    Delete a review
+// @access  Private
+router.delete('/:id/reviews/:reviewId', authenticate, deleteProductReview);
 
 module.exports = router;

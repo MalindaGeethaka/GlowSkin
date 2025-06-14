@@ -44,6 +44,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/feedback', require('./routes/feedback'));
+app.use('/api/inquiries', require('./routes/inquiries'));
 app.use('/api/uploads', require('./routes/uploads'));
 
 // Health check endpoint
