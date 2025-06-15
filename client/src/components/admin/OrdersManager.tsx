@@ -27,96 +27,115 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose, onS
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
-        <div className="flex justify-between items-start mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">Order Details</h3>
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Modal Header */}
+        <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-6 md:px-8 py-4 md:py-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-white">Order Details</h2>
+            <p className="text-pink-100 mt-1 text-sm md:text-base">
+              Order #{order._id.slice(-8)}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+            aria-label="Close modal"
           >
-            ×
+            <XCircle className="h-5 w-5 md:h-6 md:w-6" />
           </button>
         </div>
+          {/* Modal Body */}
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+          <div className="p-6 md:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Order ID:</label>
+                  <p className="text-gray-900">#{order._id.slice(-8)}</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Customer:</label>
+                  <p className="text-gray-900">
+                    {typeof order.user === 'object' ? order.user.name : 'N/A'}
+                    {typeof order.user === 'object' && order.user.email && (
+                      <span className="text-gray-500 block">{order.user.email}</span>
+                    )}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Total Amount:</label>
+                  <p className="text-gray-900 font-bold">
+                    Rs. {(order.totalAmount || order.totalPrice || 0).toLocaleString()}
+                  </p>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Order ID:</label>
-              <p className="text-gray-900">#{order._id.slice(-8)}</p>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Customer:</label>
-              <p className="text-gray-900">
-                {typeof order.user === 'object' ? order.user.name : 'N/A'}
-                {typeof order.user === 'object' && order.user.email && (
-                  <span className="text-gray-500 block">{order.user.email}</span>
-                )}
-              </p>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Total Amount:</label>
-              <p className="text-gray-900 font-bold">
-                Rs. {(order.totalAmount || order.totalPrice || 0).toLocaleString()}
-              </p>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Order Date:</label>
+                  <p className="text-gray-900">
+                    {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}
+                  </p>
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Order Date:</label>
-              <p className="text-gray-900">
-                {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}
-              </p>
-            </div>
-          </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Status:</label>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value as 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled')}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Status:</label>              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value as 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-              >
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Items:</label>
-              <div className="space-y-2">
-                {order.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                    <span className="text-sm text-gray-900">
-                      {typeof item.product === 'object' ? item.product.title : 'Product'}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      Qty: {item.quantity} × Rs. {item.price}
-                    </span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Items:</label>
+                  <div className="space-y-2">
+                    {order.items?.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                        <span className="text-sm text-gray-900">
+                          {typeof item.product === 'object' ? item.product.title : 'Product'}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          Qty: {item.quantity} × Rs. {item.price}
+                        </span>
+                      </div>
+                    )) || <p className="text-gray-500">No items</p>}
                   </div>
-                )) || <p className="text-gray-500">No items</p>}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex justify-end space-x-4 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Close
-          </button>
-          <button
-            onClick={handleStatusUpdate}
-            className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"
-          >
-            Update Status
-          </button>
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleStatusUpdate}
+                className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"
+              >
+                Update Status
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -231,85 +250,13 @@ const OrdersManager: React.FC = () => {
       (typeof order.user === 'object' && order.user.name?.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
-
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Order Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{orderStats.total}</p>
-            </div>
-            <ShoppingBag className="h-8 w-8 text-blue-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{orderStats.pending}</p>
-            </div>
-            <Clock className="h-8 w-8 text-yellow-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Processing</p>
-              <p className="text-2xl font-bold text-blue-600">{orderStats.processing}</p>
-            </div>
-            <Activity className="h-8 w-8 text-blue-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Shipped</p>
-              <p className="text-2xl font-bold text-purple-600">{orderStats.shipped}</p>
-            </div>
-            <Truck className="h-8 w-8 text-purple-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Delivered</p>
-              <p className="text-2xl font-bold text-green-600">{orderStats.delivered}</p>
-            </div>
-            <CheckCircle className="h-8 w-8 text-green-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Cancelled</p>
-              <p className="text-2xl font-bold text-red-600">{orderStats.cancelled}</p>
-            </div>
-            <XCircle className="h-8 w-8 text-red-500" />
-          </div>
-        </div>
-      </div>
-
       {/* Main Orders Card */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-6">
@@ -326,6 +273,80 @@ const OrdersManager: React.FC = () => {
         </div>
 
         <div className="p-8">
+          {/* Order Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-blue-700">Total Orders</p>
+                  <p className="text-2xl font-bold text-blue-900">{orderStats.total}</p>
+                </div>
+                <div className="bg-blue-500 p-3 rounded-lg">
+                  <ShoppingBag className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-yellow-700">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-900">{orderStats.pending}</p>
+                </div>
+                <div className="bg-yellow-500 p-3 rounded-lg">
+                  <Clock className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-blue-700">Processing</p>
+                  <p className="text-2xl font-bold text-blue-900">{orderStats.processing}</p>
+                </div>
+                <div className="bg-blue-600 p-3 rounded-lg">
+                  <Activity className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-purple-700">Shipped</p>
+                  <p className="text-2xl font-bold text-purple-900">{orderStats.shipped}</p>
+                </div>
+                <div className="bg-purple-500 p-3 rounded-lg">
+                  <Truck className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-green-700">Delivered</p>
+                  <p className="text-2xl font-bold text-green-900">{orderStats.delivered}</p>
+                </div>
+                <div className="bg-green-500 p-3 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-red-700">Cancelled</p>
+                  <p className="text-2xl font-bold text-red-900">{orderStats.cancelled}</p>
+                </div>
+                <div className="bg-red-500 p-3 rounded-lg">
+                  <XCircle className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Filters and Search */}
           <div className="mb-6 bg-gray-50 p-6 rounded-xl border border-gray-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -376,9 +397,11 @@ const OrdersManager: React.FC = () => {
                 <option value="asc">Ascending</option>
               </select>
             </div>
-          </div>
-
-          {filteredOrders.length === 0 ? (
+          </div>          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>

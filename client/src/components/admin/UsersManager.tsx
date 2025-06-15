@@ -31,7 +31,6 @@ const UsersManager: React.FC = () => {
       setLoading(false);
     }
   };
-
   const filteredUsers = users.filter(user => {
     const matchesSearch = !searchTerm || 
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,14 +38,6 @@ const UsersManager: React.FC = () => {
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -83,9 +74,11 @@ const UsersManager: React.FC = () => {
                 <option value="admin">Administrators</option>
               </select>
             </div>
-          </div>
-
-          {filteredUsers.length === 0 ? (
+          </div>          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            </div>
+          ) : filteredUsers.length === 0 ? (
             <div className="text-center py-12">
               <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>

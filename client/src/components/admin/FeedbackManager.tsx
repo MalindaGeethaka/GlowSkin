@@ -70,17 +70,8 @@ const FeedbackManager: React.FC = () => {
         fetchInquiries();
       }
     } catch (error) {
-      console.error('Failed to respond to inquiry:', error);
-    }
+      console.error('Failed to respond to inquiry:', error);    }
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -88,10 +79,12 @@ const FeedbackManager: React.FC = () => {
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-6">
           <h1 className="text-3xl font-bold text-white">Customer Inquiries</h1>
           <p className="text-pink-100 mt-2">Manage and respond to customer messages</p>
-        </div>
-
-        <div className="p-8">
-          {inquiries.length === 0 ? (
+        </div>        <div className="p-8">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+            </div>
+          ) : inquiries.length === 0 ? (
             <div className="text-center py-12">
               <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No inquiries yet</h3>
