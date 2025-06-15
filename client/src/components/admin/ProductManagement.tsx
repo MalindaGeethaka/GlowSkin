@@ -5,18 +5,18 @@ import { getImageUrl } from '../../utils';
 
 interface ProductManagementProps {
   onProductAction: (action: string, product?: Product) => void;
+  refreshTrigger?: number;
 }
 
-const ProductManagement: React.FC<ProductManagementProps> = ({ onProductAction }) => {
+const ProductManagement: React.FC<ProductManagementProps> = ({ onProductAction, refreshTrigger }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
   useEffect(() => {
     fetchProducts();
-  }, [currentPage]);
+  }, [currentPage, refreshTrigger]);
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -75,19 +75,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onProductAction }
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Product Management</h2>
-        <button
-          onClick={() => onProductAction('create')}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          Add New Product
-        </button>
-      </div>
-
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
