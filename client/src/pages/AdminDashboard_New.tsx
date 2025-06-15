@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { userService } from '../services/userService';
+import { Product, Order } from '../types';
 import ProductsManager from '../components/admin/ProductsManager';
 import OrdersManager from '../components/admin/OrdersManager';
 import FeedbackManager from '../components/admin/FeedbackManager';
@@ -15,8 +16,10 @@ import {
   MessageSquare, 
   TrendingUp, 
   DollarSign,
+  ShoppingCart,
   UserCheck,
   Plus,
+  Edit,
   Eye,
   BarChart3,
   Calendar,
@@ -56,9 +59,7 @@ const AdminDashboard: React.FC = () => {
         productService.getProducts({ limit: 1 }),
         orderService.getOrders({ limit: 1 }),
         userService.getUsers({ limit: 1 })
-      ]);
-
-      // Calculate total revenue from all orders
+      ]);      // Calculate total revenue from all orders
       const allOrders = await orderService.getOrders({ limit: 1000 });
       const totalRevenue = allOrders.data?.orders?.reduce((sum, order) => sum + (order.totalAmount || order.totalPrice || 0), 0) || 0;
 
@@ -74,16 +75,12 @@ const AdminDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-
   const navigation = [
     { name: 'Overview', key: 'overview', path: '/admin', icon: LayoutDashboard },
     { name: 'Products', key: 'products', path: '/admin/products', icon: Package },
     { name: 'Orders', key: 'orders', path: '/admin/orders', icon: ShoppingBag },
     { name: 'Users', key: 'users', path: '/admin/users', icon: Users },
-    { name: 'Feedback', key: 'feedback', path: '/admin/feedback', icon: MessageSquare },
-  ];
-
-  return (
+    { name: 'Feedback', key: 'feedback', path: '/admin/feedback', icon: MessageSquare },  ];  return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="flex min-h-screen">
         {/* Modern Sidebar */}
@@ -101,9 +98,7 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600">GlowSkin Management</p>
                 </div>
               </div>
-            </div>
-
-            <nav className="px-4 py-6">
+            </div>            <nav className="px-4 py-6">
               <div className="space-y-2">
                 {navigation.map((item) => {
                   const Icon = item.icon;
