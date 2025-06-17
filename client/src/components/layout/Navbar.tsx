@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full"></div>
             <span className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-              GlowSkin
+              GlowSkinPro
             </span>
           </Link>          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
