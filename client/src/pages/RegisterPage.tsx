@@ -25,7 +25,6 @@ const RegisterPage: React.FC = () => {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -41,15 +40,35 @@ const RegisterPage: React.FC = () => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+    } else {
+      const passwordErrors = [];
+      
+      if (formData.password.length < 6) {
+        passwordErrors.push('at least 6 characters');
+      }
+      
+      if (!/(?=.*[a-z])/.test(formData.password)) {
+        passwordErrors.push('one lowercase letter');
+      }
+      
+      if (!/(?=.*[A-Z])/.test(formData.password)) {
+        passwordErrors.push('one uppercase letter');
+      }
+      
+      if (!/(?=.*\d)/.test(formData.password)) {
+        passwordErrors.push('one number');
+      }
+      
+      if (passwordErrors.length > 0) {
+        newErrors.password = `Password must contain ${passwordErrors.join(', ')}`;
+      }
     }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
-    }    if (formData.phone && !/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/[\s-]/g, ''))) {
+    }if (formData.phone && !/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/[\s-]/g, ''))) {
       newErrors.phone = 'Please enter a valid 10-15 digit phone number';
     }
 
@@ -83,12 +102,26 @@ const RegisterPage: React.FC = () => {
       });
       navigate('/login', { 
         state: { message: 'Registration successful! Please sign in to continue.' }
-      });
-    } catch (error: any) {
+      });    } catch (error: any) {
       console.error('Registration error:', error);
-      setErrors({ 
-        submit: error.response?.data?.message || error.message || 'Registration failed. Please try again.' 
-      });
+      
+      // Handle validation errors from backend
+      if (error.response?.status === 400 && error.response?.data?.errors) {
+        const backendErrors: { [key: string]: string } = {};
+        
+        error.response.data.errors.forEach((err: any) => {
+          const field = err.path || err.param;
+          if (field) {
+            backendErrors[field] = err.msg || err.message;
+          }
+        });
+        
+        setErrors(backendErrors);
+      } else {
+        setErrors({ 
+          submit: error.response?.data?.message || error.message || 'Registration failed. Please try again.' 
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -269,10 +302,42 @@ const RegisterPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
-                  </button>
-                </div>
+                  </button>                </div>
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                )}
+                
+                {/* Password Requirements */}
+                {formData.password && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</p>
+                    <div className="space-y-1">
+                      <div className={`flex items-center text-xs ${formData.password.length >= 6 ? 'text-green-600' : 'text-gray-500'}`}>
+                        <svg className={`w-3 h-3 mr-2 ${formData.password.length >= 6 ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        At least 6 characters
+                      </div>
+                      <div className={`flex items-center text-xs ${/(?=.*[a-z])/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                        <svg className={`w-3 h-3 mr-2 ${/(?=.*[a-z])/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        One lowercase letter
+                      </div>
+                      <div className={`flex items-center text-xs ${/(?=.*[A-Z])/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                        <svg className={`w-3 h-3 mr-2 ${/(?=.*[A-Z])/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        One uppercase letter
+                      </div>
+                      <div className={`flex items-center text-xs ${/(?=.*\d)/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                        <svg className={`w-3 h-3 mr-2 ${/(?=.*\d)/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        One number
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
