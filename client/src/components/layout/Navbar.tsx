@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 
@@ -11,6 +11,33 @@ const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Function to check if a path is active
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Function to get active link classes
+  const getNavLinkClass = (path: string) => {
+    const baseClasses = "transition-colors font-medium";
+    const activeClasses = "text-pink-600 bg-pink-50 px-3 py-2 rounded-lg";
+    const inactiveClasses = "text-gray-700 hover:text-pink-500";
+    
+    return `${baseClasses} ${isActivePath(path) ? activeClasses : inactiveClasses}`;
+  };
+
+  // Function to get mobile nav link classes
+  const getMobileNavLinkClass = (path: string) => {
+    const baseClasses = "transition-colors font-medium block py-2";
+    const activeClasses = "text-pink-600 bg-pink-50 px-3 rounded-lg";
+    const inactiveClasses = "text-gray-700 hover:text-pink-500";
+    
+    return `${baseClasses} ${isActivePath(path) ? activeClasses : inactiveClasses}`;
+  };
 
   const handleLogout = () => {
     logout();
@@ -43,25 +70,28 @@ const Navbar: React.FC = () => {
             </span>
           </Link>          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-pink-500 transition-colors">
+            <Link to="/" className={getNavLinkClass('/')}>
               Home
             </Link>
-            <Link to="/products" className="text-gray-700 hover:text-pink-500 transition-colors">
+            <Link to="/products" className={getNavLinkClass('/products')}>
               Products
             </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-pink-500 transition-colors">
+            <Link to="/contact" className={getNavLinkClass('/contact')}>
               Contact
             </Link>
             {user?.role === 'admin' && (
-              <Link to="/admin" className="text-gray-700 hover:text-pink-500 transition-colors">
+              <Link to="/admin" className={getNavLinkClass('/admin')}>
                 Dashboard
               </Link>
             )}
           </div>{/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link 
+          <div className="hidden md:flex items-center space-x-6">            <Link 
               to="/cart" 
-              className="relative p-3 text-gray-700 hover:text-pink-500 transition-colors rounded-lg hover:bg-pink-50 mr-2"
+              className={`relative p-3 transition-colors rounded-lg mr-2 ${
+                isActivePath('/cart') 
+                  ? 'text-pink-600 bg-pink-50' 
+                  : 'text-gray-700 hover:text-pink-500 hover:bg-pink-50'
+              }`}
             >
               <ShoppingCart className="w-6 h-6" />
          
@@ -138,12 +168,25 @@ const Navbar: React.FC = () => {
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link to="/login" className="btn-outline text-sm px-4 py-2">
+            ) : (              <div className="flex items-center space-x-4">
+                <Link 
+                  to="/login" 
+                  className={`text-sm px-4 py-2 transition-colors rounded-lg border ${
+                    isActivePath('/login')
+                      ? 'bg-pink-600 text-white border-pink-600'
+                      : 'btn-outline'
+                  }`}
+                >
                   Login
                 </Link>
-                <Link to="/register" className="btn-primary text-sm px-4 py-2">
+                <Link 
+                  to="/register" 
+                  className={`text-sm px-4 py-2 transition-colors rounded-lg ${
+                    isActivePath('/register')
+                      ? 'bg-pink-700 text-white'
+                      : 'btn-primary'
+                  }`}
+                >
                   Sign Up
                 </Link>
               </div>
@@ -167,22 +210,31 @@ const Navbar: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col space-y-4">
-              <Link to="/" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/" className={getMobileNavLinkClass('/')} onClick={() => setIsMenuOpen(false)}>
                 Home
               </Link>
-              <Link to="/products" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/products" className={getMobileNavLinkClass('/products')} onClick={() => setIsMenuOpen(false)}>
                 Products
               </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/contact" className={getMobileNavLinkClass('/contact')} onClick={() => setIsMenuOpen(false)}>
                 Contact
               </Link>
               {user?.role === 'admin' && (
-                <Link to="/admin" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                <Link to="/admin" className={getMobileNavLinkClass('/admin')} onClick={() => setIsMenuOpen(false)}>
                   Dashboard
                 </Link>
               )}
-              <Link to="/cart" className="text-gray-700 hover:text-pink-500 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                Cart ({getTotalItems()})
+              <Link 
+                to="/cart" 
+                className={`${getMobileNavLinkClass('/cart')} flex items-center justify-between`} 
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span>Cart</span>
+                {getTotalItems() > 0 && (
+                  <span className="bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                    {getTotalItems()}
+                  </span>
+                )}
               </Link>
                 {user ? (
                 <>
@@ -195,8 +247,15 @@ const Navbar: React.FC = () => {
                       <div className="text-xs text-gray-500 capitalize">{user.role} Account</div>
                     </div>
                   </div>
-                  
-                  <Link to="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-pink-500 transition-colors py-2" onClick={() => setIsMenuOpen(false)}>
+                    <Link 
+                    to="/profile" 
+                    className={`flex items-center space-x-2 transition-colors py-2 ${
+                      isActivePath('/profile') 
+                        ? 'text-pink-600 bg-pink-50 px-3 rounded-lg' 
+                        : 'text-gray-700 hover:text-pink-500'
+                    }`} 
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     <User className="w-4 h-4" />
                     <span>My Profile</span>
                   </Link>
