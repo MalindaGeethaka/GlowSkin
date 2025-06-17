@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../layout/logo.png'
 
 const Footer: React.FC = () => {
   return (
@@ -9,7 +10,7 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-glowSkin-pink to-glowSkin-purple rounded-full"></div>
+              <div><img className='w-14 h-14'  src={logo} alt="" /></div>
               <span className="text-xl font-heading font-bold">GlowSkin</span>
             </div>
             <p className="text-gray-400 mb-4">
