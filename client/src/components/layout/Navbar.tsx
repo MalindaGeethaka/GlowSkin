@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
+import logo from '../layout/logo.png'
 
 import { ShoppingCart, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 
@@ -64,7 +65,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full"></div>
+            <div><img className='w-14 h-14'  src={logo} alt="" /></div>
             <span className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
               GlowSkin
             </span>
