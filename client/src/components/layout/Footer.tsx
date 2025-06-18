@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 GlowSkin. All rights reserved. Made with ❤️ for beautiful skin.</p>
+          <p>&copy; 2025 GlowSkin. All rights reserved. Made with ❤️ for beautiful skin.</p>
         </div>
       </div>
     </footer>
