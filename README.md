@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GlowSkin E-commerce Platform
 
 A modern, full-stack e-commerce platform for skincare products built with React, Node.js, and MongoDB.
@@ -313,3 +314,7 @@ If you encounter any issues or have questions:
 ---
 
 Made with ❤️ for skincare enthusiasts in Sri Lanka and beyond.
+=======
+# GlowSkin
+e commerce website for Glow Skin Skincare
+>>>>>>> 5f8f2c8206b3bb3200a5fc750ab97c364366b54f
