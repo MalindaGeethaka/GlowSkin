@@ -1,0 +1,36 @@
+[33m973d7d5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD~6
+[33m9b0fff3[m HEAD@{1}: reset: moving to HEAD~6
+[33m7dc5825[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mbackup-before-reset[m[33m)[m HEAD@{2}: pull --tags origin main: Fast-forward
+[33m9b0fff3[m HEAD@{3}: reset: moving to HEAD~6
+[33m7dc5825[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mbackup-before-reset[m[33m)[m HEAD@{4}: pull --tags origin main: Fast-forward
+[33m9b0fff3[m HEAD@{5}: reset: moving to HEAD~6
+[33m7dc5825[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mbackup-before-reset[m[33m)[m HEAD@{6}: commit: productpage
+[33m917dca5[m HEAD@{7}: commit: update homepage and products
+[33mb4d4bcd[m HEAD@{8}: commit: update product service
+[33maf6f80a[m HEAD@{9}: commit: update product page
+[33m19f597e[m HEAD@{10}: commit: update product service.ts
+[33m46f3c1d[m HEAD@{11}: commit: update product page
+[33m9b0fff3[m HEAD@{12}: commit: update env.example
+[33m9b0c03b[m HEAD@{13}: commit: update server.js1
+[33m8645b8e[m HEAD@{14}: commit: update server.js
+[33m29a31f3[m HEAD@{15}: commit: update server.js
+[33mc8f5a08[m HEAD@{16}: commit: update server.js
+[33m05e3d7c[m HEAD@{17}: commit: change server.js
+[33m973d7d5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{18}: commit: change client url
+[33mc669f32[m HEAD@{19}: commit: update env.example
+[33m3511a4d[m HEAD@{20}: commit: update cors url
+[33mfe704bd[m HEAD@{21}: commit: update the cors
+[33mbbaa9c5[m HEAD@{22}: commit: update api
+[33mdb705b9[m HEAD@{23}: commit: change api
+[33mbc00589[m HEAD@{24}: commit (merge): Merge remote changes
+[33me795203[m HEAD@{25}: Branch: renamed refs/heads/main to refs/heads/main
+[33me795203[m HEAD@{27}: Branch: renamed refs/heads/main to refs/heads/main
+[33me795203[m HEAD@{29}: commit: add more products
+[33m946a7db[m HEAD@{30}: commit: update the footer year
+[33md4181fd[m HEAD@{31}: commit: changed footer logo
+[33m01c59f1[m HEAD@{32}: commit: logo changed
+[33ma8158d8[m HEAD@{33}: pull --tags origin main: Fast-forward
+[33m007e28f[m HEAD@{34}: pull --tags origin main: Fast-forward
+[33m67f5d62[m HEAD@{35}: commit: update the navbar
+[33mf57a2f4[m HEAD@{36}: commit: update the nav bar
+[33m2cbe518[m HEAD@{37}: clone: from https://github.com/gihanbandaraa/e-commerce-skincare.git
