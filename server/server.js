@@ -13,6 +13,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.VITE_API_URL || 'https://glow-skin-production.up.railway.app',
   credentials: true
 }));
 
