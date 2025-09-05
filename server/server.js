@@ -14,8 +14,8 @@ app.use(helmet());
 
 // CORS
 const allowedOrigins = [
-  "http://localhost:3000",          // local dev
-  process.env.CLIENT_URL             // deployed frontend
+  "http://localhost:3000",
+  process.env.CLIENT_URL?.trim()   // remove accidental spaces
 ];
 
 app.use(cors({
@@ -23,6 +23,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`CORS not allowed for ${origin}`);
       callback(new Error(`CORS not allowed for ${origin}`));
     }
   },
