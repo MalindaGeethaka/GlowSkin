@@ -45,9 +45,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploads
-app.use('/uploads',cors({
+app.use('/uploads', cors({
   origin: 'https://glow-skin-one.vercel.app',
-}),express.static(path.join(__dirname, 'uploads')));
+}), express.static(path.join(__dirname, 'uploads')));
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
