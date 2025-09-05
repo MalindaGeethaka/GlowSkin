@@ -14,8 +14,9 @@ app.use(helmet());
 
 // CORS
 const allowedOrigins = [
-  "http://localhost:3000",
-  process.env.CLIENT_URL?.trim()   // remove accidental spaces
+  "http://localhost:3000",                      // local dev
+  "https://glow-skin-one.vercel.app",          // production frontend
+  "https://glow-skin-z5pc86ueh-malinda-bandaras-projects.vercel.app" // Vercel preview
 ];
 
 app.use(cors({
