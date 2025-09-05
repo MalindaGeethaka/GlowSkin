@@ -12,7 +12,7 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.VITE_API_URL || 'https://glow-skin-production.up.railway.app',
+  origin: process.env.VITE_API_URL || '"https://glow-skin-one.vercel.app" ',
   credentials: true
 }));
 
