@@ -16,7 +16,7 @@ export const getImageUrl = (imagePath: string): string => {
   }
   
   // Get base URL from environment or default (for production)
-  const baseUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';  
+  const baseUrl = process.env.REACT_APP_API_URL || 'https://glow-skin-production.up.railway.app/api';  
   // Remove leading slash if present to avoid double slashes
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   
