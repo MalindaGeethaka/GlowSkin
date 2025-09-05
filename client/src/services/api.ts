@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.VITE_API_URL || 'https://glow-skin-production.up.railway.app/',
+  baseURL: process.env.VITE_API_URL || 'https://glow-skin-production.up.railway.app',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
