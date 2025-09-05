@@ -11,8 +11,19 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+const allowedOrigins = [
+  "http://localhost:3000",          // local dev
+  process.env.CLIENT_URL             // your Vercel frontend
+];
+
 app.use(cors({
-  origin: process.env.VITE_API_URL || '"https://glow-skin-one.vercel.app" ',
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS not allowed for ${origin}`));
+    }
+  },
   credentials: true
 }));
 
