@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve uploads
 app.use(cors({
-  origin: 'https://glow-skin-one.vercel.app/products',
+  origin: 'https://glow-skin-one.vercel.app',
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
